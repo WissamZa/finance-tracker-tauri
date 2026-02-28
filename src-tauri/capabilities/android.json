@@ -1,7 +1,7 @@
 {
-  "$schema": "../gen/schemas/mobile-schema.json",
+  "$schema": "../gen/schemas/android-schema.json",
   "identifier": "android",
-  "description": "Android-specific capabilities",
+  "description": "Android capabilities for Finance Tracker",
   "windows": ["main"],
   "permissions": [
     "core:default",
@@ -19,17 +19,6 @@
     "fs:allow-read-text-file",
     "fs:allow-write-text-file",
     "fs:allow-exists",
-    "fs:allow-mkdir",
-    {
-      "identifier": "fs:scope",
-      "allow": [
-        { "path": "$HOME/**" },
-        { "path": "$DOCUMENT/**" },
-        { "path": "$DOWNLOAD/**" },
-        { "path": "$APPDATA/**" },
-        { "path": "$APPLOCALDATA/**" }
-      ]
-    }
-  ],
-  "platforms": ["android"]
+    "fs:allow-mkdir"
+  ]
 }

@@ -14,76 +14,72 @@ A cross-platform application for tracking income and expenses, built with Tauri 
 
 ## Tech Stack
 
-| Component | Technology |
-|-----------|------------|
-| **Frontend** | React 19, TypeScript, Vite |
-| **Styling** | Tailwind CSS v4, shadcn/ui components |
-| **Desktop** | Tauri 2.0 (Rust backend) |
-| **Mobile** | Tauri 2.0 Mobile (Android) |
-| **Local DB** | Dexie.js (IndexedDB) |
-| **Cloud DB** | Supabase |
-| **State Management** | Zustand |
+- **Frontend**: React 19, TypeScript, Vite
+- **Styling**: Tailwind CSS v4, shadcn/ui components
+- **Desktop Framework**: Tauri 2.0 (Rust backend)
+- **Mobile Framework**: Tauri 2.0 Mobile (Android)
+- **Local Database**: Dexie.js (IndexedDB)
+- **Cloud Database**: Supabase
+- **State Management**: Zustand
 
 ## Prerequisites
 
-### For Desktop (All Platforms)
+### For Desktop (Windows/macOS/Linux)
 - [Node.js](https://nodejs.org/) (v18 or later)
 - [Bun](https://bun.sh/) (recommended) or npm
 - [Rust](https://www.rust-lang.org/tools/install) (latest stable)
-
-### Platform-Specific Dependencies
-
-#### Windows
-- Microsoft Visual Studio C++ Build Tools
-- WebView2 (usually pre-installed on Windows 10/11)
-
-#### macOS
-- Xcode Command Line Tools: `xcode-select --install`
-
-#### Linux (Ubuntu/Debian)
-```bash
-sudo apt update
-sudo apt install libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
-```
+- Platform-specific dependencies:
+  - **Windows**: Microsoft Visual Studio C++ Build Tools
+  - **macOS**: Xcode Command Line Tools
+  - **Linux**: webkit2gtk, openssl, etc.
 
 ### For Android
-- [Rust Android targets](https://tauri.app/start/create-mobile-app/#android)
-- [Android Studio](https://developer.android.com/studio) or Android SDK
-- Android NDK (installed via Android Studio SDK Manager)
-- JDK 17 or later
+- All desktop prerequisites, plus:
+- [Android Studio](https://developer.android.com/studio) with:
+  - Android SDK 34
+  - Android NDK
+  - Build Tools
+- [JDK 17](https://adoptium.net/) or later
+- Environment variables:
+  ```bash
+  export ANDROID_HOME=$HOME/Android/Sdk
+  export NDK_HOME=$ANDROID_HOME/ndk/<version>
+  ```
 
 ## Getting Started
 
-### 1. Clone the Repository
-```bash
-git clone https://github.com/WissamZa/finance-tracker-tauri.git
-cd finance-tracker-tauri
-```
+### Install dependencies
 
-### 2. Install Dependencies
 ```bash
 bun install
 ```
 
-### 3. Development
+### Desktop Development
 
-#### Desktop Development
 ```bash
+# Start development server with Tauri
 bun tauri:dev
 ```
 
-#### Android Development
+### Android Development
+
 ```bash
-# First time: Initialize Android project
+# Initialize Android project (first time only)
 bun tauri:android:init
 
-# Run on Android emulator or device
+# Run on Android device/emulator
 bun tauri:android:dev
+
+# Build Android APK
+bun tauri:android:build
+
+# Build Android release APK/AAB
+bun tauri:android:build:release
 ```
 
 ## Build for Production
 
-### Desktop Builds
+### Desktop
 
 ```bash
 # Build for current platform
@@ -95,7 +91,7 @@ bun tauri:build:win      # Windows x64
 bun tauri:build:linux    # Linux x64
 ```
 
-### Android Build
+### Android
 
 ```bash
 # Debug APK
@@ -108,36 +104,6 @@ bun tauri:android:build:release
 Build outputs:
 - **APK**: `src-tauri/gen/android/app/build/outputs/apk/`
 - **AAB**: `src-tauri/gen/android/app/build/outputs/bundle/`
-
-## Android Setup Guide
-
-### 1. Install Rust Android Targets
-```bash
-rustup target add aarch64-linux-android
-rustup target add armv7-linux-androideabi
-rustup target add i686-linux-android
-rustup target add x86_64-linux-android
-```
-
-### 2. Set Environment Variables
-Add to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.):
-```bash
-export ANDROID_HOME=$HOME/Android/Sdk
-export NDK_HOME=$ANDROID_HOME/ndk/27.0.11902837  # Adjust version as needed
-export PATH=$PATH:$ANDROID_HOME/emulator
-export PATH=$PATH:$ANDROID_HOME/platform-tools
-```
-
-### 3. Initialize Android Project
-```bash
-bun tauri:android:init
-```
-
-### 4. Run on Device/Emulator
-```bash
-# Start an Android emulator first, or connect a device
-bun tauri:android:dev
-```
 
 ## Project Structure
 
@@ -153,6 +119,7 @@ finance-tracker-tauri/
 │   └── index.css          # Tailwind CSS styles
 ├── src-tauri/             # Rust backend (Tauri)
 │   ├── src/               # Rust source files
+│   ├── gen/android/       # Android project files
 │   ├── capabilities/      # Tauri permissions
 │   ├── Cargo.toml         # Rust dependencies
 │   └── tauri.conf.json    # Tauri configuration
@@ -169,20 +136,25 @@ finance-tracker-tauri/
 2. Run the SQL schema from the original project
 3. Configure your Supabase credentials in the app's Database Settings
 
-## Troubleshooting
+## Installing Rust
 
-### Android Build Issues
+```bash
+# macOS/Linux
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
-**Error: `failed to run 'cargo metadata'`**
-- Ensure Rust is installed and in your PATH
-- Run `rustup target add aarch64-linux-android`
+# Windows
+# Download from https://win.rustup.rs/
+```
 
-**Error: `ANDROID_HOME not set`**
-- Set the `ANDROID_HOME` environment variable to your Android SDK path
+## Adding Android Targets
 
-**Error: `NDK not found`**
-- Install NDK via Android Studio SDK Manager
-- Set `NDK_HOME` environment variable
+```bash
+# Add Android targets to Rust
+rustup target add aarch64-linux-android
+rustup target add armv7-linux-androideabi
+rustup target add i686-linux-android
+rustup target add x86_64-linux-android
+```
 
 ## License
 
@@ -190,4 +162,4 @@ MIT
 
 ## Original Project
 
-This is a Tauri desktop version of the [original Next.js Income & Expense Tracker](https://github.com/WissamZa/app).
+This is a Tauri desktop/android version of the [original Next.js Income & Expense Tracker](https://github.com/WissamZa/app).

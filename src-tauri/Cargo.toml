@@ -25,9 +25,17 @@ tauri-plugin-dialog = "2"
 tauri-plugin-fs = "2"
 tauri-plugin-shell = "2"
 
+# Android-specific dependencies
+[target.'cfg(target_os = "android")'.dependencies]
+jni = "0.21"
+
 [profile.release]
 panic = "abort"
 codegen-units = 1
 lto = true
 opt-level = "s"
 strip = true
+
+# Android-specific profile
+[profile.release.package.finance-tracker]
+opt-level = "s"
