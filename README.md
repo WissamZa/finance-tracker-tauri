@@ -22,9 +22,39 @@ A cross-platform application for tracking income and expenses, built with Tauri 
 - **Cloud Database**: Supabase
 - **State Management**: Zustand
 
-## Prerequisites
+## Quick Start (Automated Setup)
 
-### For Desktop (Windows/macOS/Linux)
+### Linux
+
+```bash
+# Run the setup script
+chmod +x scripts/setup-linux.sh
+./scripts/setup-linux.sh
+
+# After setup, restart your terminal and run:
+bun install
+bun tauri:dev
+```
+
+### Windows
+
+Open PowerShell **as Administrator** and run:
+
+```powershell
+# Run the setup script
+Set-ExecutionPolicy Bypass -Scope Process -Force
+.\scripts\setup-windows.ps1
+
+# After setup, restart PowerShell and run:
+bun install
+bun tauri:dev
+```
+
+## Manual Setup
+
+### Prerequisites
+
+#### For Desktop (Windows/macOS/Linux)
 - [Node.js](https://nodejs.org/) (v18 or later)
 - [Bun](https://bun.sh/) (recommended) or npm
 - [Rust](https://www.rust-lang.org/tools/install) (latest stable)
@@ -33,20 +63,18 @@ A cross-platform application for tracking income and expenses, built with Tauri 
   - **macOS**: Xcode Command Line Tools
   - **Linux**: webkit2gtk, openssl, etc.
 
-### For Android
+#### For Android
 - All desktop prerequisites, plus:
 - [Android Studio](https://developer.android.com/studio) with:
   - Android SDK 34
-  - Android NDK
-  - Build Tools
+  - Android NDK 25.2.9519653
+  - Build Tools 34.0.0
 - [JDK 17](https://adoptium.net/) or later
 - Environment variables:
   ```bash
   export ANDROID_HOME=$HOME/Android/Sdk
-  export NDK_HOME=$ANDROID_HOME/ndk/<version>
+  export NDK_HOME=$ANDROID_HOME/ndk/25.2.9519653
   ```
-
-## Getting Started
 
 ### Install dependencies
 
@@ -102,6 +130,7 @@ bun tauri:android:build:release
 ```
 
 Build outputs:
+- **Desktop**: `src-tauri/target/release/bundle/`
 - **APK**: `src-tauri/gen/android/app/build/outputs/apk/`
 - **AAB**: `src-tauri/gen/android/app/build/outputs/bundle/`
 
@@ -123,6 +152,9 @@ finance-tracker-tauri/
 │   ├── capabilities/      # Tauri permissions
 │   ├── Cargo.toml         # Rust dependencies
 │   └── tauri.conf.json    # Tauri configuration
+├── scripts/               # Setup scripts
+│   ├── setup-linux.sh     # Linux automated setup
+│   └── setup-windows.ps1  # Windows automated setup
 ├── index.html             # HTML template
 ├── vite.config.ts         # Vite configuration
 └── package.json           # Node.js dependencies
@@ -136,7 +168,7 @@ finance-tracker-tauri/
 2. Run the SQL schema from the original project
 3. Configure your Supabase credentials in the app's Database Settings
 
-## Installing Rust
+## Manual Rust Installation
 
 ```bash
 # macOS/Linux
@@ -146,7 +178,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 # Download from https://win.rustup.rs/
 ```
 
-## Adding Android Targets
+## Adding Android Targets Manually
 
 ```bash
 # Add Android targets to Rust
@@ -155,6 +187,21 @@ rustup target add armv7-linux-androideabi
 rustup target add i686-linux-android
 rustup target add x86_64-linux-android
 ```
+
+## Available Commands
+
+| Command | Description |
+|---------|-------------|
+| `bun dev` | Start Vite dev server only |
+| `bun tauri:dev` | Run desktop app in dev mode |
+| `bun tauri:build` | Build desktop app for current platform |
+| `bun tauri:build:mac` | Build for macOS Universal |
+| `bun tauri:build:win` | Build for Windows x64 |
+| `bun tauri:build:linux` | Build for Linux x64 |
+| `bun tauri:android:init` | Initialize Android project |
+| `bun tauri:android:dev` | Run Android app in dev mode |
+| `bun tauri:android:build` | Build Android APK |
+| `bun tauri:android:build:release` | Build Android release APK/AAB |
 
 ## License
 
