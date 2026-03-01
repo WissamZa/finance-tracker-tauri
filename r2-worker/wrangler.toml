@@ -1,0 +1,12 @@
+name = "finance-tracker-r2"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# R2 bucket binding
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "finance-tracker-files"
+
+# Environment variables (set via Cloudflare dashboard or wrangler)
+[vars]
+# ALLOWED_ORIGINS will be set in Cloudflare dashboard

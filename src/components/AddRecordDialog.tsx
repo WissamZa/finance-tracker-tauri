@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import {
   Plus, TrendingUp, TrendingDown, Banknote, CreditCard,
@@ -22,7 +20,6 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { TranslationKey } from '@/lib/i18n';
 import { Category, Record } from '@/lib/db';
-import Image from 'next/image';
 
 interface AddRecordDialogProps {
   t: (key: TranslationKey) => string;
@@ -394,12 +391,10 @@ export function AddRecordDialog({
                                       <FileText className="h-6 w-6" />
                                     </div>
                                   ) : (
-                                    <Image
+                                    <img
                                       src={resolveFileUrl(item.imageData)}
                                       alt={item.imageName || 'uploaded'}
-                                      fill
-                                      className="object-cover transition-opacity hover:opacity-80"
-                                      unoptimized
+                                      className="w-full h-full object-cover transition-opacity hover:opacity-80"
                                     />
                                   )}
                                   <label htmlFor={`image-upload-${index}`} className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
