@@ -2,8 +2,11 @@
  * Cloudflare Worker for R2 File Operations
  * 
  * Handles:
+ * - GET / - Health check
+ * - GET /files - List files
+ * - POST /upload - Initialize upload and get key
+ * - PUT /upload/:key - Upload file data
  * - GET /file/:key - Get a file from R2
- * - POST /upload - Get presigned URL for upload
  * - DELETE /file/:key - Delete a file from R2
  */
 
@@ -25,7 +28,6 @@ const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 // CORS headers
 function corsHeaders(origin: string, allowedOrigins: string | undefined): HeadersInit {
-  // Default to allowing all origins if not configured
   const originsStr = allowedOrigins || '*';
   const origins = originsStr.split(',').map(o => o.trim());
   const allowedOrigin = origins.includes('*') ? '*' : 
@@ -55,8 +57,8 @@ function generateKey(filename: string): string {
   return `${uuid}.${ext}`;
 }
 
-// Upload endpoint - get presigned URL or direct upload
-async function handleUpload(request: Request, env: Env): Promise<Response> {
+// Upload endpoint - get upload key
+async function handleUploadInit(request: Request, env: Env): Promise<Response> {
   const origin = request.headers.get('Origin') || '*';
   
   try {
@@ -90,17 +92,7 @@ async function handleUpload(request: Request, env: Env): Promise<Response> {
     // Generate unique key
     const key = generateKey(body.filename);
 
-    // Create presigned URL for upload (valid for 5 minutes)
-    const url = await env.BUCKET.createMultipartUpload(key, {
-      httpMetadata: {
-        contentType: body.contentType,
-      },
-    });
-
-    // For simpler direct upload, we'll return a signed URL
-    // R2 doesn't have presigned URLs like S3, so we use a different approach
-    // Return the key and let client upload via PUT to our worker
-    
+    // Return the key for direct upload - NO multipart upload
     return new Response(JSON.stringify({ 
       key,
       uploadUrl: `/upload/${key}`,
@@ -117,7 +109,7 @@ async function handleUpload(request: Request, env: Env): Promise<Response> {
   }
 }
 
-// Direct upload endpoint
+// Direct upload endpoint - store file in R2
 async function handleDirectUpload(request: Request, env: Env, key: string): Promise<Response> {
   const origin = request.headers.get('Origin') || '*';
   
@@ -142,10 +134,13 @@ async function handleDirectUpload(request: Request, env: Env, key: string): Prom
       });
     }
 
-    // Upload to R2
+    // Upload to R2 with metadata
     await env.BUCKET.put(key, fileData, {
       httpMetadata: {
         contentType,
+      },
+      customMetadata: {
+        uploadedAt: new Date().toISOString(),
       },
     });
 
@@ -162,6 +157,45 @@ async function handleDirectUpload(request: Request, env: Env, key: string): Prom
   } catch (error) {
     console.error('Upload error:', error);
     return new Response(JSON.stringify({ error: 'Upload failed' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders(origin, env.ALLOWED_ORIGINS) },
+    });
+  }
+}
+
+// List files endpoint
+async function handleListFiles(request: Request, env: Env): Promise<Response> {
+  const origin = request.headers.get('Origin') || '*';
+  
+  try {
+    const url = new URL(request.url);
+    const cursor = url.searchParams.get('cursor') || undefined;
+    const limit = parseInt(url.searchParams.get('limit') || '100');
+    
+    // List objects from R2
+    const listed = await env.BUCKET.list({
+      limit,
+      cursor,
+    });
+
+    const files = listed.objects.map(obj => ({
+      key: obj.key,
+      size: obj.size,
+      uploadedAt: obj.uploaded || obj.customMetadata?.uploadedAt,
+      contentType: obj.httpMetadata?.contentType,
+    }));
+
+    return new Response(JSON.stringify({ 
+      files,
+      cursor: listed.truncated ? listed.cursor : null,
+      hasMore: listed.truncated,
+    }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders(origin, env.ALLOWED_ORIGINS) },
+    });
+  } catch (error) {
+    console.error('List error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to list files' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json', ...corsHeaders(origin, env.ALLOWED_ORIGINS) },
     });
@@ -228,9 +262,14 @@ export default {
       return handleOptions(request, env);
     }
 
+    // Route: GET /files - List all files
+    if (path === '/files' && request.method === 'GET') {
+      return handleListFiles(request, env);
+    }
+
     // Route: POST /upload - Initialize upload and get key
     if (path === '/upload' && request.method === 'POST') {
-      return handleUpload(request, env);
+      return handleUploadInit(request, env);
     }
 
     // Route: PUT /upload/:key - Direct upload file
@@ -257,7 +296,7 @@ export default {
       return new Response(JSON.stringify({ 
         status: 'ok', 
         service: 'Finance Tracker R2 API',
-        version: '1.0.0'
+        version: '2.0.0'
       }), {
         headers: { 'Content-Type': 'application/json', ...corsHeaders(origin, env.ALLOWED_ORIGINS) },
       });

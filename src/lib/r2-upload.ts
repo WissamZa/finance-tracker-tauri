@@ -186,3 +186,47 @@ export function isFileTypeAllowed(file: File): boolean {
 export function getAllowedFileTypes(): string[] {
   return [...ALLOWED_TYPES];
 }
+
+/**
+ * List files from R2
+ */
+export async function listR2Files(limit: number = 100, cursor?: string): Promise<{
+  files: Array<{
+    key: string;
+    size: number;
+    uploadedAt?: string;
+    contentType?: string;
+  }>;
+  cursor?: string;
+  hasMore: boolean;
+  error?: string;
+}> {
+  const workerUrl = getWorkerUrl();
+
+  if (!workerUrl) {
+    return { files: [], hasMore: false, error: 'R2 Worker URL not configured' };
+  }
+
+  try {
+    let url = `${workerUrl}/files?limit=${limit}`;
+    if (cursor) {
+      url += `&cursor=${encodeURIComponent(cursor)}`;
+    }
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return { files: [], hasMore: false, error: errorData.error || 'Failed to list files' };
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('List files error:', error);
+    return {
+      files: [],
+      hasMore: false,
+      error: error instanceof Error ? error.message : 'Failed to list files'
+    };
+  }
+}

@@ -53,7 +53,6 @@ import { AdminPanel } from '@/components/AdminPanel';
 import { ChartsView } from '@/components/ChartsView';
 import { BatchImportDialog } from '@/components/BatchImportDialog';
 import { FileUpload } from '@/components/FileUpload';
-import { FileDownload } from '@/components/FileDownload';
 import { onAuthStateChange, getSession, signOut } from '@/lib/supabase';
 
 // Type definitions moved to lib or shared file in a real app
@@ -766,23 +765,11 @@ function App() {
                   <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest opacity-60">Upload and download files securely via R2</p>
                 </div>
 
-                <div className="w-full max-w-md">
+                <div className="w-full max-w-lg">
                   <FileUpload onUploadComplete={(key) => {
-                    toast.success("File uploaded and key saved to console");
                     console.log("Uploaded file key:", key);
                   }} />
                 </div>
-
-                <Card className="w-full max-w-md border-none bg-white/50 dark:bg-slate-900/50 backdrop-blur-md rounded-4xl shadow-xl p-6">
-                  <h3 className="text-lg font-bold mb-4">Saved Files</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Once you've uploaded a file, its key will appear here for testing.
-                  </p>
-                  <div className="space-y-2">
-                    <p className="text-xs italic text-muted-foreground">Example of download button with a key:</p>
-                    <FileDownload fileKey="example-key" label="Try Download (will 404 if key invalid)" />
-                  </div>
-                </Card>
               </div>
             </TabsContent>
 
