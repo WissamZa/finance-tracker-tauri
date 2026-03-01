@@ -1,17 +1,17 @@
 
-
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { AlertCircle, CheckCircle2, Upload, FileText } from 'lucide-react';
 import { toast } from 'sonner';
+import { uploadToR2, isR2Configured } from '@/lib/r2-upload';
 
 interface FileUploadProps {
     onUploadComplete?: (key: string) => void;
 }
 
-type UploadStatus = 'idle' | 'gettingURL' | 'uploading' | 'done' | 'error';
+type UploadStatus = 'idle' | 'uploading' | 'done' | 'error';
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
@@ -43,58 +43,35 @@ export function FileUpload({ onUploadComplete }: FileUploadProps) {
     const uploadFile = async () => {
         if (!file) return;
 
-        setStatus('gettingURL');
+        if (!isR2Configured()) {
+            setError('R2 upload not configured. Set VITE_R2_WORKER_URL in .env');
+            toast.error('R2 upload not configured');
+            setStatus('error');
+            return;
+        }
+
+        setStatus('uploading');
         setError(null);
         setProgress(0);
 
         try {
-            // 1. Get presigned URL
-            const response = await fetch('/api/upload', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    filename: file.name,
-                    contentType: file.type,
-                    fileSize: file.size,
-                }),
-            });
+            // Simulate progress for user feedback
+            const progressInterval = setInterval(() => {
+                setProgress(prev => Math.min(prev + 10, 90));
+            }, 100);
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to get upload URL');
-            }
+            const result = await uploadToR2(file);
 
-            const { presignedUrl, key } = await response.json();
+            clearInterval(progressInterval);
+            setProgress(100);
 
-            // 2. Upload to R2
-            setStatus('uploading');
-
-            const uploadResponse = await new Promise<boolean>((resolve, reject) => {
-                const xhr = new XMLHttpRequest();
-                xhr.open('PUT', presignedUrl);
-                xhr.setRequestHeader('Content-Type', file.type);
-
-                xhr.upload.onprogress = (event) => {
-                    if (event.lengthComputable) {
-                        const percent = Math.round((event.loaded / event.total) * 100);
-                        setProgress(percent);
-                    }
-                };
-
-                xhr.onload = () => {
-                    if (xhr.status === 200) resolve(true);
-                    else reject(new Error('Upload failed'));
-                };
-
-                xhr.onerror = () => reject(new Error('Network error during upload'));
-                xhr.send(file);
-            });
-
-            if (uploadResponse) {
+            if (result.success && result.key) {
                 setStatus('done');
-                setUploadedKey(key);
+                setUploadedKey(result.key);
                 toast.success('File uploaded successfully');
-                if (onUploadComplete) onUploadComplete(key);
+                if (onUploadComplete) onUploadComplete(result.key);
+            } else {
+                throw new Error(result.error || 'Upload failed');
             }
         } catch (err: any) {
             console.error('Upload failed:', err);
@@ -137,10 +114,10 @@ export function FileUpload({ onUploadComplete }: FileUploadProps) {
                         </div>
                     )}
 
-                    {status !== 'idle' && (
+                    {status === 'uploading' && (
                         <div className="space-y-2">
                             <div className="flex justify-between text-xs">
-                                <span>{status === 'gettingURL' ? 'Preparing...' : 'Uploading...'}</span>
+                                <span>Uploading...</span>
                                 <span>{progress}%</span>
                             </div>
                             <Progress value={progress} className="h-2" />
@@ -157,10 +134,10 @@ export function FileUpload({ onUploadComplete }: FileUploadProps) {
                     <div className="flex gap-2">
                         <Button
                             onClick={uploadFile}
-                            disabled={!file || status === 'gettingURL' || status === 'uploading'}
+                            disabled={!file || status === 'uploading'}
                             className="flex-1"
                         >
-                            {status === 'idle' || status === 'error' ? 'Upload File' : 'Processing...'}
+                            {status === 'idle' || status === 'error' ? 'Upload File' : 'Uploading...'}
                         </Button>
                         {(file || status !== 'idle') && (
                             <Button variant="outline" onClick={reset} disabled={status === 'uploading'}>

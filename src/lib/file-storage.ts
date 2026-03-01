@@ -2,25 +2,25 @@
  * File Storage Utility for Tauri
  * 
  * Supports multiple storage backends:
- * 1. Local file storage (Tauri fs plugin) - offline only
+ * 1. Local file storage (localStorage/IndexedDB) - offline only
  * 2. Supabase Storage - cloud sync
- * 3. Remote API (R2 via backend) - requires deployed API
+ * 3. Cloudflare R2 via Worker - remote API
  */
 
 import { getSupabaseClient } from './supabase';
+import { uploadToR2, deleteFromR2, getR2FileUrl, isR2Configured } from './r2-upload';
 
 // Storage backend type
-type StorageBackend = 'local' | 'supabase' | 'remote-api';
+type StorageBackend = 'local' | 'supabase' | 'r2';
 
 // Get the configured storage backend
 function getStorageBackend(): StorageBackend {
   const useLocal = import.meta.env.VITE_USE_LOCAL_STORAGE === 'true';
-  const apiUrl = import.meta.env.VITE_API_URL;
   const supabaseClient = getSupabaseClient();
 
   if (useLocal) return 'local';
   if (supabaseClient) return 'supabase';
-  if (apiUrl) return 'remote-api';
+  if (isR2Configured()) return 'r2';
   return 'local'; // Default to local
 }
 
@@ -37,8 +37,8 @@ export async function uploadFile(
     switch (backend) {
       case 'supabase':
         return await uploadToSupabase(file, onProgress);
-      case 'remote-api':
-        return await uploadToRemoteAPI(file, onProgress);
+      case 'r2':
+        return await uploadToR2Storage(file);
       case 'local':
       default:
         return await uploadToLocal(file);
@@ -59,8 +59,8 @@ export async function getFileUrl(key: string): Promise<string | null> {
     switch (backend) {
       case 'supabase':
         return await getSupabaseFileUrl(key);
-      case 'remote-api':
-        return await getRemoteAPIFileUrl(key);
+      case 'r2':
+        return getR2FileUrl(key);
       case 'local':
       default:
         return await getLocalFileUrl(key);
@@ -81,8 +81,9 @@ export async function deleteFile(key: string): Promise<boolean> {
     switch (backend) {
       case 'supabase':
         return await deleteFromSupabase(key);
-      case 'remote-api':
-        return await deleteFromRemoteAPI(key);
+      case 'r2':
+        const result = await deleteFromR2(key);
+        return result.success;
       case 'local':
       default:
         return await deleteFromLocal(key);
@@ -94,7 +95,7 @@ export async function deleteFile(key: string): Promise<boolean> {
 }
 
 // ===========================================
-// LOCAL STORAGE (Tauri fs plugin)
+// LOCAL STORAGE (localStorage for base64)
 // ===========================================
 
 async function uploadToLocal(file: File): Promise<{ key: string; url: string }> {
@@ -184,79 +185,18 @@ async function deleteFromSupabase(key: string): Promise<boolean> {
 }
 
 // ===========================================
-// REMOTE API (R2 via backend)
+// R2 STORAGE (via Cloudflare Worker)
 // ===========================================
 
-async function uploadToRemoteAPI(
-  file: File,
-  onProgress?: (progress: number) => void
-): Promise<{ key: string; url: string }> {
-  const apiUrl = import.meta.env.VITE_API_URL;
-  if (!apiUrl) throw new Error('API URL not configured');
-
-  // Get presigned URL from backend
-  const res = await fetch(`${apiUrl}/api/upload`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      filename: file.name,
-      contentType: file.type,
-      fileSize: file.size,
-    }),
-  });
-
-  if (!res.ok) throw new Error('Failed to get upload URL');
-
-  const { presignedUrl, key } = await res.json();
-
-  // Upload directly to R2
-  const uploadRes = await fetch(presignedUrl, {
-    method: 'PUT',
-    headers: { 'Content-Type': file.type },
-    body: file,
-  });
-
-  if (!uploadRes.ok) throw new Error('Upload failed');
-
-  // Construct public URL
-  const publicUrl = import.meta.env.VITE_R2_PUBLIC_URL;
-  const url = publicUrl ? `${publicUrl}/${key}` : key;
-
-  return { key, url };
-}
-
-async function getRemoteAPIFileUrl(key: string): Promise<string | null> {
-  const apiUrl = import.meta.env.VITE_API_URL;
-  const publicUrl = import.meta.env.VITE_R2_PUBLIC_URL;
-
-  if (publicUrl) {
-    return `${publicUrl}/${key}`;
+async function uploadToR2Storage(file: File): Promise<{ key: string; url: string }> {
+  const result = await uploadToR2(file);
+  
+  if (!result.success || !result.key) {
+    throw new Error(result.error || 'R2 upload failed');
   }
 
-  if (!apiUrl) return null;
-
-  // Get signed URL from backend
-  const res = await fetch(`${apiUrl}/api/files/sign`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key }),
-  });
-
-  if (!res.ok) return null;
-
-  const { signedUrl } = await res.json();
-  return signedUrl;
-}
-
-async function deleteFromRemoteAPI(key: string): Promise<boolean> {
-  const apiUrl = import.meta.env.VITE_API_URL;
-  if (!apiUrl) return false;
-
-  const res = await fetch(`${apiUrl}/api/files/delete`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key }),
-  });
-
-  return res.ok;
+  return { 
+    key: result.key, 
+    url: result.url || getR2FileUrl(result.key) 
+  };
 }

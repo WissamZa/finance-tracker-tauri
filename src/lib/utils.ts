@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { getR2FileUrl, isR2Configured } from "./r2-upload"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -10,7 +11,11 @@ export const resolveFileUrl = (urlOrKey: string) => {
   if (urlOrKey.startsWith('data:') || urlOrKey.startsWith('http') || urlOrKey.startsWith('blob:')) {
     return urlOrKey;
   }
-  return `/api/files/sign?key=${encodeURIComponent(urlOrKey)}`;
+  // Use R2 worker URL for file keys
+  if (isR2Configured()) {
+    return getR2FileUrl(urlOrKey);
+  }
+  return urlOrKey;
 };
 
 // Safe logging - only logs in development mode
