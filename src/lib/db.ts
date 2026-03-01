@@ -17,12 +17,12 @@ function getDb(source: DatabaseSource) {
 }
 
 // Initialize default categories
-export async function initDefaultCategories(source: DatabaseSource = 'supabase') {
+export async function initDefaultCategories(source: DatabaseSource = 'local') {
   return getDb(source).initDefaultCategories();
 }
 
 // Category operations
-export async function getCategories(source: DatabaseSource = 'supabase', type?: 'income' | 'expense') {
+export async function getCategories(source: DatabaseSource = 'local', type?: 'income' | 'expense') {
   if (source === 'supabase') {
     return supabaseDb.getCategories(type);
   }
@@ -30,7 +30,7 @@ export async function getCategories(source: DatabaseSource = 'supabase', type?: 
 }
 
 export async function addCategory(
-  source: DatabaseSource = 'supabase',
+  source: DatabaseSource = 'local',
   name: string, 
   type: 'income' | 'expense', 
   isDefault: boolean = false
@@ -42,7 +42,7 @@ export async function addCategory(
 }
 
 export async function updateCategory(
-  source: DatabaseSource = 'supabase',
+  source: DatabaseSource = 'local',
   id: string,
   updates: Partial<{ name: string; type: 'income' | 'expense'; isDefault: boolean }>
 ) {
@@ -52,7 +52,7 @@ export async function updateCategory(
   return localDb.updateCategory(id, updates);
 }
 
-export async function deleteCategory(source: DatabaseSource = 'supabase', id: string) {
+export async function deleteCategory(source: DatabaseSource = 'local', id: string) {
   if (source === 'supabase') {
     return supabaseDb.deleteCategory(id);
   }
@@ -60,7 +60,7 @@ export async function deleteCategory(source: DatabaseSource = 'supabase', id: st
 }
 
 // Record operations
-export async function getRecords(source: DatabaseSource = 'supabase', month?: number, year?: number) {
+export async function getRecords(source: DatabaseSource = 'local', month?: number, year?: number) {
   if (source === 'supabase') {
     return supabaseDb.getRecords(month, year);
   }
@@ -68,7 +68,7 @@ export async function getRecords(source: DatabaseSource = 'supabase', month?: nu
 }
 
 export async function addRecord(
-  source: DatabaseSource = 'supabase',
+  source: DatabaseSource = 'local',
   type: 'income' | 'expense',
   cashAmount: number,
   creditAmount: number,
@@ -83,7 +83,7 @@ export async function addRecord(
 }
 
 export async function bulkAddRecords(
-  source: DatabaseSource = 'supabase',
+  source: DatabaseSource = 'local',
   records: {
     type: 'income' | 'expense';
     cashAmount: number;
@@ -100,7 +100,7 @@ export async function bulkAddRecords(
 }
 
 export async function updateRecord(
-  source: DatabaseSource = 'supabase',
+  source: DatabaseSource = 'local',
   id: string,
   type: 'income' | 'expense',
   cashAmount: number,
@@ -115,7 +115,7 @@ export async function updateRecord(
   return localDb.updateRecord(id, type, cashAmount, creditAmount, date, note, lineItems);
 }
 
-export async function deleteRecord(source: DatabaseSource = 'supabase', id: string) {
+export async function deleteRecord(source: DatabaseSource = 'local', id: string) {
   if (source === 'supabase') {
     return supabaseDb.deleteRecord(id);
   }
@@ -123,7 +123,7 @@ export async function deleteRecord(source: DatabaseSource = 'supabase', id: stri
 }
 
 // Backup and Restore
-export async function createBackup(source: DatabaseSource = 'supabase') {
+export async function createBackup(source: DatabaseSource = 'local') {
   if (source === 'supabase') {
     return supabaseDb.createBackup();
   }
@@ -131,7 +131,7 @@ export async function createBackup(source: DatabaseSource = 'supabase') {
 }
 
 export async function restoreBackup(
-  source: DatabaseSource = 'supabase',
+  source: DatabaseSource = 'local',
    
   backupData: any
 ) {
@@ -142,14 +142,14 @@ export async function restoreBackup(
 }
 
 // Export functions
-export async function exportToJSON(source: DatabaseSource = 'supabase', month?: number, year?: number) {
+export async function exportToJSON(source: DatabaseSource = 'local', month?: number, year?: number) {
   if (source === 'supabase') {
     return supabaseDb.exportToJSON(month, year);
   }
   return localDb.exportToJSON(month, year);
 }
 
-export async function exportToCSV(source: DatabaseSource = 'supabase', month?: number, year?: number) {
+export async function exportToCSV(source: DatabaseSource = 'local', month?: number, year?: number) {
   if (source === 'supabase') {
     return supabaseDb.exportToCSV(month, year);
   }
@@ -157,7 +157,7 @@ export async function exportToCSV(source: DatabaseSource = 'supabase', month?: n
 }
 
 // Clear all data
-export async function clearAllData(source: DatabaseSource = 'supabase') {
+export async function clearAllData(source: DatabaseSource = 'local') {
   if (source === 'supabase') {
     return supabaseDb.clearAllData();
   }

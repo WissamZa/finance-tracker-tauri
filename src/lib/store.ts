@@ -42,8 +42,8 @@ export const useAppStore = create<AppState>()(
       setCurrentMonth: (month) => set((state) => ({ currentMonth: typeof month === 'function' ? month(state.currentMonth) : month })),
       currentYear: new Date().getFullYear(),
       setCurrentYear: (year) => set((state) => ({ currentYear: typeof year === 'function' ? year(state.currentYear) : year })),
-      // Database settings
-      databaseSource: 'supabase',
+      // Database settings - default to 'local' for offline-first Tauri app
+      databaseSource: 'local',
       setDatabaseSource: (source) => set((state) => ({ databaseSource: typeof source === 'function' ? source(state.databaseSource) : source })),
       supabaseConfig: null,
       setSupabaseConfig: (config) => set((state) => ({ supabaseConfig: typeof config === 'function' ? config(state.supabaseConfig) : config })),
