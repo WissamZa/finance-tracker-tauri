@@ -19,8 +19,6 @@ export interface Env {
 const ALLOWED_FILE_TYPES = [
   'image/jpeg',
   'image/png',
-  'image/gif',
-  'image/webp',
   'application/pdf',
 ];
 
@@ -74,7 +72,7 @@ async function handleUploadInit(request: Request, env: Env): Promise<Response> {
     // Validate file type
     if (!ALLOWED_FILE_TYPES.includes(body.contentType)) {
       return new Response(JSON.stringify({ 
-        error: 'File type not allowed. Allowed: images (jpg, png, gif, webp) and PDF' 
+        error: 'File type not allowed. Allowed: JPG, JPEG, PNG, PDF' 
       }), {
         status: 400,
         headers: { 'Content-Type': 'application/json', ...corsHeaders(origin, env.ALLOWED_ORIGINS) },

@@ -342,7 +342,7 @@ export function AddRecordDialog({
                           <div className="flex items-center gap-2">
                             <input
                               type="file"
-                              accept="image/*,application/pdf"
+                              accept=".jpg,.jpeg,.png,.pdf"
                               id={`image-upload-${index}`}
                               className="hidden"
                               onChange={(e) => {

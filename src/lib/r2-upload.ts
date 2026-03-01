@@ -7,8 +7,6 @@
 const ALLOWED_TYPES = [
   'image/jpeg',
   'image/png',
-  'image/gif',
-  'image/webp',
   'application/pdf',
 ];
 
@@ -35,7 +33,7 @@ function validateFile(file: File): { valid: boolean; error?: string } {
   if (!ALLOWED_TYPES.includes(file.type)) {
     return { 
       valid: false, 
-      error: 'Invalid file type. Allowed: JPG, PNG, GIF, WebP, PDF' 
+      error: 'Invalid file type. Allowed: JPG, JPEG, PNG, PDF' 
     };
   }
 

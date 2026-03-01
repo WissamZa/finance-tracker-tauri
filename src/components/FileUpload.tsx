@@ -181,7 +181,7 @@ export function FileUpload({ onUploadComplete }: FileUploadProps) {
                 <div className="space-y-4">
                     <Input
                         type="file"
-                        accept="image/*,.pdf"
+                        accept=".jpg,.jpeg,.png,.pdf"
                         onChange={handleFileChange}
                         disabled={status !== 'idle' && status !== 'error'}
                         ref={fileInputRef}
