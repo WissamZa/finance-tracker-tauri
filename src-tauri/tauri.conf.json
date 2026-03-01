@@ -47,15 +47,7 @@
       "certificateThumbprint": null,
       "digestAlgorithm": "sha256",
       "timestampUrl": ""
-    },
-    "android": {
-      "minSdkVersion": 24
     }
   },
-  "plugins": {},
-  "tauri": {
-    "android": {
-      "minSdkVersion": 24
-    }
-  }
+  "plugins": {}
 }
