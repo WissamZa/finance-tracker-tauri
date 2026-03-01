@@ -1,15 +1,32 @@
 {
   "compilerOptions": {
-    "target": "ES2021",
-    "lib": ["ES2021"],
+    /* Base Options */
+    "target": "ESNext",
+    "lib": ["ESNext"],
     "module": "ESNext",
-    "moduleResolution": "node",
-    "types": ["@cloudflare/workers-types"],
+    /* Module Resolution - "bundler" is now preferred over "node" for Workers */
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
+    "allowImportingTsExtensions": true,
+    
+    /* Types - Using generated types + Workers runtime types */
+    "types": [
+      "@cloudflare/workers-types/experimental",
+      "./worker-configuration.d.ts"
+    ],
+    
+    /* Strictness & Safety */
     "strict": true,
     "noEmit": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true,
+    
+    /* Advanced Linting (Optional but Recommended) */
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "worker-configuration.d.ts"]
 }
