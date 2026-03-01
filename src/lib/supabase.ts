@@ -4,6 +4,18 @@ let supabaseClient: SupabaseClient | null = null;
 let supabaseUrl: string | null = null;
 let supabaseKey: string | null = null;
 
+// Initialize from environment variables if available
+function initFromEnv(): void {
+  if (supabaseClient) return;
+
+  const envUrl = import.meta.env.VITE_SUPABASE_URL;
+  const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+  if (envUrl && envKey) {
+    createSupabaseClient(envUrl, envKey);
+  }
+}
+
 export function createSupabaseClient(url: string, key: string): SupabaseClient {
   // Return existing client if it has the same config
   if (supabaseClient && supabaseUrl === url && supabaseKey === key) {
@@ -26,6 +38,10 @@ export function createSupabaseClient(url: string, key: string): SupabaseClient {
 }
 
 export function getSupabaseClient(): SupabaseClient | null {
+  // Try to initialize from environment variables
+  if (!supabaseClient) {
+    initFromEnv();
+  }
   return supabaseClient;
 }
 
@@ -97,11 +113,11 @@ export async function testSupabaseConnection(url: string, key: string): Promise<
       }
     });
     const { error } = await client.from('categories').select('count').limit(1);
-    
+
     if (error && error.code !== 'PGRST116') {
       return { success: false, error: error.message };
     }
-    
+
     return { success: true };
   } catch (err) {
     return { success: false, error: String(err) };
@@ -118,19 +134,19 @@ export async function initSupabaseTables(url: string, key: string): Promise<{ su
         detectSessionInUrl: false
       }
     });
-    
+
     const tables = ['categories', 'records', 'line_items'];
-    
+
     for (const table of tables) {
       const { error } = await client.from(table).select('count').limit(1);
       if (error && error.code !== 'PGRST116') {
-        return { 
-          success: false, 
-          error: `Table '${table}' not found. Please create it in Supabase SQL editor.` 
+        return {
+          success: false,
+          error: `Table '${table}' not found. Please create it in Supabase SQL editor.`
         };
       }
     }
-    
+
     return { success: true };
   } catch (err) {
     return { success: false, error: String(err) };
