@@ -1,4 +1,4 @@
-'use client';
+
 
 import { TrendingUp, TrendingDown, Wallet, Banknote, CreditCard } from 'lucide-react';
 import { Card, CardHeader, CardDescription, CardTitle } from '@/components/ui/card';

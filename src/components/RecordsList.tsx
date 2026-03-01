@@ -1,5 +1,3 @@
-'use client';
-
 import {
   Calendar, ArrowUpDown, Banknote, CreditCard, MoreVertical,
   Edit, Trash2, TrendingUp, TrendingDown, Tag, FileText
@@ -20,7 +18,6 @@ import {
 } from '@/components/ui/table';
 import { TranslationKey } from '@/lib/i18n';
 import { Category, Record } from '@/lib/db';
-import Image from 'next/image';
 
 interface RecordsListProps {
   t: (key: TranslationKey) => string;
@@ -301,11 +298,10 @@ export function RecordsList({
                                                 <FileText className="h-6 w-6" />
                                               </div>
                                             ) : (
-                                              <Image
+                                              <img
                                                 src={signedUrls[item.imageData!] || resolveFileUrl(item.imageData!)}
                                                 alt={item.imageName || 'image'}
-                                                fill
-                                                className="object-cover transition-transform hover:scale-110"
+                                                className="w-full h-full object-cover transition-transform hover:scale-110"
                                               />
                                             )}
                                             {isAdmin && onFileDelete && (
