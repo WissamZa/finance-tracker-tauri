@@ -17,7 +17,7 @@
     "tauri:android:init": "tauri android init",
     "tauri:android:dev": "tauri android dev",
     "tauri:android:build": "tauri android build",
-    "tauri:android:build:release": "tauri android build --release"
+    "tauri:android:build:release": "tauri android build -- --release"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
