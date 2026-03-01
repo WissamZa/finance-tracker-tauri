@@ -14,6 +14,7 @@ import {
   DialogHeader, DialogTitle
 } from '@/components/ui/dialog';
 import { resolveFileUrl } from '@/lib/utils';
+import { uploadToR2, isR2Configured } from '@/lib/r2-upload';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from '@/components/ui/select';
@@ -126,31 +127,16 @@ export function AddRecordDialog({
 
             // If there's a pending file, upload it now
             if (item.file) {
-              const uploadResponse = await fetch('/api/upload', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  filename: item.file.name,
-                  contentType: item.file.type,
-                  fileSize: item.file.size,
-                }),
-              });
-
-              if (!uploadResponse.ok) {
-                const error = await uploadResponse.json();
-                throw new Error(error.error || `Upload failed for ${item.file.name}`);
+              if (!isR2Configured()) {
+                throw new Error('R2 upload not configured. Set VITE_R2_WORKER_URL in .env');
               }
 
-              const { presignedUrl, key } = await uploadResponse.json();
+              const result = await uploadToR2(item.file);
+              if (!result.success || !result.key) {
+                throw new Error(result.error || `Upload failed for ${item.file.name}`);
+              }
 
-              const cloudflareRes = await fetch(presignedUrl, {
-                method: 'PUT',
-                body: item.file,
-              });
-
-              if (!cloudflareRes.ok) throw new Error(`Cloudflare upload failed for ${item.file.name}`);
-
-              finalImageData = key;
+              finalImageData = result.key;
             }
 
             return {
