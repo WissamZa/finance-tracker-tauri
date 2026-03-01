@@ -9,7 +9,7 @@
 
 export interface Env {
   BUCKET: R2Bucket;
-  ALLOWED_ORIGINS: string;
+  ALLOWED_ORIGINS?: string;
   R2_PUBLIC_URL?: string;
 }
 
@@ -24,8 +24,10 @@ const ALLOWED_FILE_TYPES = [
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 // CORS headers
-function corsHeaders(origin: string, allowedOrigins: string): HeadersInit {
-  const origins = allowedOrigins.split(',').map(o => o.trim());
+function corsHeaders(origin: string, allowedOrigins: string | undefined): HeadersInit {
+  // Default to allowing all origins if not configured
+  const originsStr = allowedOrigins || '*';
+  const origins = originsStr.split(',').map(o => o.trim());
   const allowedOrigin = origins.includes('*') ? '*' : 
     origins.includes(origin) ? origin : origins[0];
 

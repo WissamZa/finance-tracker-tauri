@@ -7,6 +7,6 @@ compatibility_date = "2026-03-01"
 binding = "BUCKET"
 bucket_name = "income-tracker"
 
-# Environment variables (set via Cloudflare dashboard or wrangler)
+# Environment variables
 [vars]
-# ALLOWED_ORIGINS will be set in Cloudflare dashboard
+ALLOWED_ORIGINS = "*"
