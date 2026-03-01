@@ -42,8 +42,8 @@ export function DatabaseSettingsDialog({
   isConnecting,
   isSyncing,
 }: DatabaseSettingsDialogProps) {
-  const [url, setUrl] = useState(process.env.NEXT_PUBLIC_SUPABASE_URL || '');
-  const [key, setKey] = useState(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '');
+  const [url, setUrl] = useState(import.meta.env.VITE_SUPABASE_URL || '');
+  const [key, setKey] = useState(import.meta.env.VITE_SUPABASE_ANON_KEY || '');
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>

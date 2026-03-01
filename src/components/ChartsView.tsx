@@ -68,7 +68,7 @@ export function ChartsView({ t, records, categories, language, yearlyData }: Cha
     expense: d.totalExpense,
   }));
 
-  const renderTrendChart = (height: string | number = "100%") => (
+  const renderTrendChart = (height: number | `${number}%` = "100%") => (
     <ResponsiveContainer width="100%" height={height}>
       <LineChart data={dailyData}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
@@ -100,7 +100,7 @@ export function ChartsView({ t, records, categories, language, yearlyData }: Cha
     </ResponsiveContainer>
   );
 
-  const renderPieChart = (height: string | number = "100%") => (
+  const renderPieChart = (height: number | `${number}%` = "100%") => (
     <ResponsiveContainer width="100%" height={height}>
       <PieChart>
         <Pie
@@ -125,7 +125,7 @@ export function ChartsView({ t, records, categories, language, yearlyData }: Cha
     </ResponsiveContainer>
   );
 
-  const renderYearlyChart = (height: string | number = "100%") => (
+  const renderYearlyChart = (height: number | `${number}%` = "100%") => (
     <ResponsiveContainer width="100%" height={height}>
       <BarChart data={formattedYearlyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
@@ -142,7 +142,7 @@ export function ChartsView({ t, records, categories, language, yearlyData }: Cha
     </ResponsiveContainer>
   );
 
-  const renderDailyBarChart = (height: string | number = "100%") => (
+  const renderDailyBarChart = (height: number | `${number}%` = "100%") => (
     <ResponsiveContainer width="100%" height={height}>
       <BarChart data={dailyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />

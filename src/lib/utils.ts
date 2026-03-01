@@ -15,7 +15,7 @@ export const resolveFileUrl = (urlOrKey: string) => {
 
 // Safe logging - only logs in development mode
 export const devLog = (...args: unknown[]) => {
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.DEV) {
     console.log(...args);
   }
 };
