@@ -2,7 +2,7 @@
 
 /// Save backup to file
 #[tauri::command]
-fn save_backup(content: String, filename: String) -> Result<String, String> {
+fn save_backup(_content: String, filename: String) -> Result<String, String> {
     // This will be handled by the frontend with Tauri's fs plugin
     Ok(format!("Backup saved to: {}", filename))
 }
