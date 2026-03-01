@@ -1,11 +1,11 @@
 name = "finance-tracker-r2"
 main = "src/index.ts"
-compatibility_date = "2024-01-01"
+compatibility_date = "2026-03-01"
 
 # R2 bucket binding
 [[r2_buckets]]
 binding = "BUCKET"
-bucket_name = "finance-tracker-files"
+bucket_name = "income-tracker"
 
 # Environment variables (set via Cloudflare dashboard or wrangler)
 [vars]
